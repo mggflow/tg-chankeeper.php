@@ -72,6 +72,11 @@ class PublishActivity
 
     protected function publishMessage()
     {
-        $this->published = $this->apiGate->sendMessage($this->currentChannel, $this->activityMessage);
+        $this->published = $this->apiGate->sendMessage($this->createChannelPeer(), $this->activityMessage);
+    }
+
+    protected function createChannelPeer(): string
+    {
+        return '@' . $this->currentChannel;
     }
 }
