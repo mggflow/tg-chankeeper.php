@@ -54,7 +54,7 @@ class ConfirmActivity
 
     protected function getLastMessage()
     {
-        $this->lastMessage = $this->apiGate->getLastMessage($this->currentChannel);
+        $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
     }
 
     protected function reactToMessage()
