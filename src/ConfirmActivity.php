@@ -3,53 +3,43 @@
 namespace MGGFLOW\Telegram\ChannelKeeper;
 
 use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
-use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ChannelsTransmitter;
 
 class ConfirmActivity
 {
-    protected ChannelsTransmitter $channelsTransmitter;
-    protected int $channelsCount;
+
     protected ApiGate $apiGate;
-    protected array $channelsNames;
-    protected array $result;
+
     protected string $currentChannel;
+    protected string $emoticon;
     protected ?object $lastMessage;
     protected ?object $reacted;
 
     public function __construct(
-        ChannelsTransmitter $channelsTransmitter, int $channelsCount,
-        ApiGate             $apiGate
+        ApiGate $apiGate
     )
     {
-        $this->channelsTransmitter = $channelsTransmitter;
-        $this->channelsCount = $channelsCount;
         $this->apiGate = $apiGate;
     }
 
-    public function confirm(): array
+    /**
+     * Подтвердить активность в канале через реакцию на последнее сообщение.
+     * @param string $channelName
+     * @param string $emoticon
+     * @return object|null
+     */
+    public function confirm(string $channelName, string $emoticon): ?object
     {
-        $this->takeChannels();
-        $this->serveChannels();
+        $this->setCurrentChannel($channelName);
+        $this->setEmoticon($emoticon);
+        $this->getLastMessage();
+        $this->reactToMessage();
 
         return $this->getResult();
     }
 
-    public function getResult(): array
+    public function getResult(): ?object
     {
-        return $this->result;
-    }
-
-    protected function takeChannels()
-    {
-        $this->channelsNames = $this->channelsTransmitter->getFreshNames($this->channelsCount);
-    }
-
-    protected function serveChannels()
-    {
-        foreach ($this->channelsNames as $channelName) {
-            $this->setCurrentChannel($channelName);
-            $this->serveChannel();
-        }
+        return $this->reacted;
     }
 
     protected function setCurrentChannel(string $name)
@@ -57,25 +47,27 @@ class ConfirmActivity
         $this->currentChannel = $name;
     }
 
-    protected function serveChannel()
+    protected function setEmoticon(string $emoticon)
     {
-        $this->getLastMessage();
-        $this->reactToMessage();
-        $this->addResult();
+        $this->emoticon = $emoticon;
     }
 
     protected function getLastMessage()
     {
-        $this->lastMessage = $this->apiGate->getChannelLastMessage($this->currentChannel);
+        $this->lastMessage = $this->apiGate->getLastMessage($this->currentChannel);
     }
 
     protected function reactToMessage()
     {
-        $this->reacted = $this->apiGate->reactToMessage($this->lastMessage);
+        $this->reacted = $this->apiGate->reactToMessage(
+            $this->createChannelPeer(),
+            $this->lastMessage->id,
+            $this->emoticon
+        );
     }
 
-    protected function addResult()
+    protected function createChannelPeer(): string
     {
-        $this->result[$this->currentChannel] = $this->reacted;
+        return '@' . $this->currentChannel;
     }
 }

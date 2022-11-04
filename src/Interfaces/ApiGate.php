@@ -4,9 +4,9 @@ namespace MGGFLOW\Telegram\ChannelKeeper\Interfaces;
 
 interface ApiGate
 {
-    public function getChannelLastMessage(string $channelName): ?object;
+    public function getLastMessage(string $peer): ?object;
 
-    public function publishChannelMessage(string $channelName, string $message): ?object;
+    public function sendMessage(string $peer, string $message): ?object;
 
-    public function reactToMessage(object $post): ?object;
+    public function reactToMessage(string $peer, int $messId, string $emoticon): ?object;
 }
