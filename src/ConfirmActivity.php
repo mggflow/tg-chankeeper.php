@@ -2,6 +2,8 @@
 
 namespace MGGFLOW\Telegram\ChannelKeeper;
 
+use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToGetLastMessage;
+use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToReactToMessage;
 use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
 
 class ConfirmActivity
@@ -55,6 +57,9 @@ class ConfirmActivity
     protected function getLastMessage()
     {
         $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
+        if (empty($this->lastMessage)){
+            throw new FailedToGetLastMessage();
+        }
     }
 
     protected function reactToMessage()
@@ -64,6 +69,9 @@ class ConfirmActivity
             $this->lastMessage->id,
             $this->emoticon
         );
+        if (empty($this->reacted)){
+            throw new FailedToReactToMessage();
+        }
     }
 
     protected function createChannelPeer(): string

@@ -2,6 +2,8 @@
 
 namespace MGGFLOW\Telegram\ChannelKeeper;
 
+use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToGetLastMessage;
+use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToPublishMessage;
 use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
 
 class PublishActivity
@@ -63,6 +65,9 @@ class PublishActivity
     protected function getLastMessage()
     {
         $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
+        if (empty($this->lastMessage)){
+            throw new FailedToGetLastMessage();
+        }
     }
 
     protected function channelActive(): bool
@@ -73,6 +78,9 @@ class PublishActivity
     protected function publishMessage()
     {
         $this->published = $this->apiGate->sendMessage($this->createChannelPeer(), $this->activityMessage);
+        if (empty($this->published)) {
+            throw new FailedToPublishMessage();
+        }
     }
 
     protected function createChannelPeer(): string
