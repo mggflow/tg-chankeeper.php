@@ -1,0 +1,20 @@
+{
+    "name": "mggflow/tg-chankeeper",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "MGGFLOW\\Telegram\\ChannelKeeper\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Pavel Eliseev",
+            "email": "deusagnis@gmail.com",
+            "homepage": "https://mggflow.in",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+    }
+}
