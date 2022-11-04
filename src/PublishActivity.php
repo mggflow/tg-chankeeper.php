@@ -25,6 +25,12 @@ class PublishActivity
 
     /**
      * Осуществить активность в канале опубликовав сообщение.
+     * @param string $channelName
+     * @param int $activityPeriod
+     * @param string $message
+     * @return bool|object|null
+     * @throws FailedToGetLastMessage
+     * @throws FailedToPublishMessage
      */
     public function publish(string $channelName, int $activityPeriod, string $message)
     {

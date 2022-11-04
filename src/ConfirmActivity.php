@@ -8,7 +8,6 @@ use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
 
 class ConfirmActivity
 {
-
     protected ApiGate $apiGate;
 
     protected string $currentChannel;
@@ -16,9 +15,7 @@ class ConfirmActivity
     protected ?object $lastMessage;
     protected ?object $reacted;
 
-    public function __construct(
-        ApiGate $apiGate
-    )
+    public function __construct(ApiGate $apiGate)
     {
         $this->apiGate = $apiGate;
     }
@@ -28,6 +25,8 @@ class ConfirmActivity
      * @param string $channelName
      * @param string $emoticon
      * @return object|null
+     * @throws FailedToGetLastMessage
+     * @throws FailedToReactToMessage
      */
     public function confirm(string $channelName, string $emoticon): ?object
     {
@@ -57,7 +56,7 @@ class ConfirmActivity
     protected function getLastMessage()
     {
         $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
-        if (empty($this->lastMessage)){
+        if (empty($this->lastMessage)) {
             throw new FailedToGetLastMessage();
         }
     }
@@ -69,7 +68,7 @@ class ConfirmActivity
             $this->lastMessage->id,
             $this->emoticon
         );
-        if (empty($this->reacted)){
+        if (empty($this->reacted)) {
             throw new FailedToReactToMessage();
         }
     }
