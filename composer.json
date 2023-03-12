@@ -16,5 +16,6 @@
         }
     ],
     "require": {
+        "mggflow/exception-manager": "^3.3"
     }
 }

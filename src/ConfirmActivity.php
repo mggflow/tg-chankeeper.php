@@ -2,8 +2,8 @@
 
 namespace MGGFLOW\Telegram\ChannelKeeper;
 
-use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToGetLastMessage;
-use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToReactToMessage;
+use MGGFLOW\ExceptionManager\Interfaces\UniException;
+use MGGFLOW\ExceptionManager\ManageException;
 use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
 
 class ConfirmActivity
@@ -25,8 +25,7 @@ class ConfirmActivity
      * @param string $channelName
      * @param string $emoticon
      * @return object|null
-     * @throws FailedToGetLastMessage
-     * @throws FailedToReactToMessage
+     * @throws UniException
      */
     public function confirm(string $channelName, string $emoticon): ?object
     {
@@ -53,14 +52,24 @@ class ConfirmActivity
         $this->emoticon = $emoticon;
     }
 
+    /**
+     * @throws UniException
+     */
     protected function getLastMessage()
     {
         $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
         if (empty($this->lastMessage)) {
-            throw new FailedToGetLastMessage();
+            throw ManageException::build()
+                ->log()->info()->b()
+                ->desc()->failed(null,'to Get Last Message')
+                ->context($this->currentChannel, 'currentChannel')->b()
+                ->fill();
         }
     }
 
+    /**
+     * @throws UniException
+     */
     protected function reactToMessage()
     {
         $this->reacted = $this->apiGate->reactToMessage(
@@ -69,7 +78,13 @@ class ConfirmActivity
             $this->emoticon
         );
         if (empty($this->reacted)) {
-            throw new FailedToReactToMessage();
+            throw ManageException::build()
+                ->log()->info()->b()
+                ->desc()->failed(null,'to React to Message')
+                ->context($this->currentChannel, 'currentChannel')
+                ->context($this->lastMessage, 'lastMessage')
+                ->context($this->emoticon, 'emoticon')->b()
+                ->fill();
         }
     }
 

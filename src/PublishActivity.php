@@ -2,8 +2,8 @@
 
 namespace MGGFLOW\Telegram\ChannelKeeper;
 
-use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToGetLastMessage;
-use MGGFLOW\Telegram\ChannelKeeper\Exceptions\FailedToPublishMessage;
+use MGGFLOW\ExceptionManager\Interfaces\UniException;
+use MGGFLOW\ExceptionManager\ManageException;
 use MGGFLOW\Telegram\ChannelKeeper\Interfaces\ApiGate;
 
 class PublishActivity
@@ -29,8 +29,7 @@ class PublishActivity
      * @param int $activityPeriod
      * @param string $message
      * @return bool|object|null
-     * @throws FailedToGetLastMessage
-     * @throws FailedToPublishMessage
+     * @throws UniException
      */
     public function publish(string $channelName, int $activityPeriod, string $message)
     {
@@ -68,11 +67,18 @@ class PublishActivity
         $this->activityMessage = $message;
     }
 
+    /**
+     * @throws UniException
+     */
     protected function getLastMessage()
     {
         $this->lastMessage = $this->apiGate->getLastMessage($this->createChannelPeer());
         if (empty($this->lastMessage)){
-            throw new FailedToGetLastMessage();
+            throw ManageException::build()
+                ->log()->info()->b()
+                ->desc()->failed(null,'to Get Last Message')
+                ->context($this->currentChannel, 'currentChannel')->b()
+                ->fill();
         }
     }
 
@@ -81,11 +87,21 @@ class PublishActivity
         return time() <= ($this->channelActivityPeriod + $this->lastMessage->date);
     }
 
+    /**
+     * @throws UniException
+     */
     protected function publishMessage()
     {
         $this->published = $this->apiGate->sendMessage($this->createChannelPeer(), $this->activityMessage);
         if (empty($this->published)) {
-            throw new FailedToPublishMessage();
+            throw ManageException::build()
+                ->log()->info()->b()
+                ->desc()->failed(null,'to Publish Activity Message')
+                ->context($this->currentChannel, 'currentChannel')
+                ->context($this->channelActivityPeriod, 'channelActivityPeriod')
+                ->context($this->activityMessage, 'activityMessage')
+                ->context($this->lastMessage, 'lastMessage')->b()
+                ->fill();
         }
     }
 
